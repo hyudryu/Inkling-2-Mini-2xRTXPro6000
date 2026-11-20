@@ -1,0 +1,18 @@
+--- a/vllm/v1/attention/backends/fa_utils.py
++++ b/vllm/v1/attention/backends/fa_utils.py
+@@ -17,6 +17,15 @@
+ 
+ if current_platform.is_cuda():
+     from vllm._custom_ops import reshape_and_cache_flash
++
++    # SM120 patch: this image's _C extension ships SM100 (and a few SM80)
++    # cubins only, so the CUDA reshape_and_cache_flash kernel cannot launch on
++    # SM12x. vLLM's Triton writer has the same signature and does the same
++    # copy (bit-identical for bf16/fp16 caches).
++    if current_platform.is_device_capability_family(120):
++        from vllm.v1.attention.ops.triton_reshape_and_cache_flash import (
++            triton_reshape_and_cache_flash as reshape_and_cache_flash,
++        )
+     from vllm.vllm_flash_attn import (  # type: ignore[attr-defined]
+         compile_flash_attn_varlen_func_from_specs,
+         flash_attn_varlen_func,
