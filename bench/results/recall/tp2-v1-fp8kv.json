@@ -1,0 +1,20 @@
+[
+ {
+  "entries": 2000,
+  "prompt_tokens": 29080,
+  "correct": 30,
+  "asked": 30
+ },
+ {
+  "entries": 8000,
+  "prompt_tokens": 119083,
+  "correct": 30,
+  "asked": 30
+ },
+ {
+  "entries": 16000,
+  "prompt_tokens": 239085,
+  "correct": 30,
+  "asked": 30
+ }
+]

@@ -7,11 +7,12 @@ import json, math, os
 from xml.sax.saxutils import escape
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "..", "docs", "charts")
+OUT = os.path.join(HERE, "..", "docs", "charts", os.environ.get("CHART_SUBDIR", ""))
 RESULTS = os.path.join(HERE, "results", os.environ.get("RESULTS", "baseline"))      # charted run
 BASELINE = os.path.join(HERE, "results", "baseline")                          # dashed comparison
 _run = os.path.basename(RESULTS)
-MODEL_LABEL = "Inkling-2-Mini + DSpark, " + (_run.capitalize() if _run == "baseline" else _run.upper())
+MODEL_LABEL = "Inkling-2-Mini + DSpark, " + {"baseline": "TP1 Baseline", "v1": "TP1 V1", "tp2-v1": "TP2 V1"}.get(_run, _run.upper())
+HARDWARE = os.environ.get("HARDWARE", "1× RTX PRO 6000 @ 450 W")
 LABEL_NUDGE = {}  # per-series (dx, dy) for the context chart end labels; tune after a render
 
 THEMES = {
@@ -144,12 +145,12 @@ def main():
         base = json.load(open(os.path.join(BASELINE, "results-decode.json")))["decode"]
     bget = lambda w, c, k: next(r[k] for r in base if r["workload"] == w and r["concurrency"] == c)
     ghost = lambda k: [(i, [bget(w, c, k) for c in levels]) for i, (w, _) in enumerate(wl)] if base else None
-    note = "baseline (dashed)" if base else None
+    note = "TP1 Baseline (dashed)" if base else None
     wl = [("prose", "Prose"), ("coding", "Coding"), ("counting", "Counting")]
     charts = {
         "decode-aggregate": dict(
             title="Aggregate decode throughput vs concurrency",
-            subtitle=f"{MODEL_LABEL} · 1× RTX PRO 6000 @ 450 W · short prompts, 1,024 output tokens",
+            subtitle=f"{MODEL_LABEL} · {HARDWARE} · short prompts, 1,024 output tokens",
             series=[(n, [get(w, c, "steady_aggregate_tps") for c in levels]) for w, n in wl],
             ylabel="Output tokens/s (all requests)", ghosts=ghost("steady_aggregate_tps"), legend_note=note),
         "decode-per-user": dict(

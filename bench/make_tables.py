@@ -10,7 +10,8 @@ import csv, datetime, json, os, statistics, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 runs = sys.argv[1:] or ["baseline"]
-label = lambda r: r.capitalize() if r == "baseline" else r.upper()
+LABELS = {"baseline": "TP1 Baseline", "v1": "TP1 V1", "tp2-v1": "TP2 V1", "v1-fp8kv": "TP1 V1 + FP8 KV", "tp2-v1-fp8kv": "TP2 V1 + FP8 KV"}
+label = lambda r: LABELS.get(r, r.upper())
 load = lambda r, f: json.load(open(os.path.join(HERE, "results", r, f)))
 pct = lambda new, old: "—" if len(runs) == 1 else f"{(new / old - 1) * 100:+.0f}%"
 
@@ -87,8 +88,12 @@ groups = {
     "Long-context decode": (phases["context"]["start"], phases["context"]["end"]),
 }
 print(f"\n### power ({label(r)})\n")
-print(header(["Phase", "Avg / max power", "Peak temp"]))
+gpus = sorted({s[1] for s in samples})
+print(header(["Phase", "Avg / max power" + (" per GPU" if len(gpus) > 1 else ""), "Peak temp"]))
 for name, (a, b) in groups.items():
-    w = [s[2] for s in samples if a <= s[0] <= b]
-    t = max(s[3] for s in samples if a <= s[0] <= b)
-    print(row([name, f"{statistics.mean(w):.0f} / {max(w):.0f} W", f"{t} °C"]))
+    cells, temps = [], []
+    for g in gpus:
+        w = [s[2] for s in samples if s[1] == g and a <= s[0] <= b]
+        cells.append(f"{statistics.mean(w):.0f} / {max(w):.0f} W")
+        temps.append(str(max(s[3] for s in samples if s[1] == g and a <= s[0] <= b)))
+    print(row([name, ", ".join(cells), " / ".join(temps) + " °C"]))
