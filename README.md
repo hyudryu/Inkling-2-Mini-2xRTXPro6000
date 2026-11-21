@@ -120,7 +120,7 @@ Symptoms before the fix: bf16 ran out of memory in warm-up at `--gpu-memory-util
 
 Cause (`vllm/v1/worker/extensible_kv_cache.py`): the KV cache is committed lazily. During warm-up vLLM may commit blocks for dummy requests up to "free memory minus a reserve", and the reserve is 10% of free memory plus a margin, about 13 GiB here. The warm-up steps need 9–12 GiB of activations plus allocator growth. With the bf16 layout (13 cache groups) warm-up asks for few blocks, so it only fails when utilization is high; with FP8 (99 groups, one per layer per pass) the same dummy requests ask for far more blocks and the commit runs to the limit: the debug log shows 197,731 of 227,708 blocks, 48.3 GiB, committed just before the sampler's 3.8 GiB logits buffer fails to allocate.
 
-Fix: `KV_CACHE_WARMUP_RESERVE_FRACTION` 0.1 → 0.25. It only bounds what warm-up may commit (6.9 GiB after the fix); the final cache is still sized from the memory measured after warm-up.
+Fix: `KV_CACHE_WARMUP_RESERVE_FRACTION` 0.1 → 0.25. It only bounds what warm-up may commit: the limit is headroom × (1 − 1.75 × fraction), so 82.5% of the 58.5 GiB headroom before (48.3 GiB) and 56.25% after (32.9 GiB in the same FP8 start), which leaves 25.6 GiB instead of 10.2 GiB for the warm-up steps; the final cache is still sized from the memory measured after warm-up.
 
 Startup at `--gpu-memory-utilization 0.95 --max-model-len 1048576` with the fix (startup lines for each in `docs/logs/`):
 
@@ -200,7 +200,7 @@ Stock, three things failed at startup with out-of-memory errors in the sampler's
 
 Cause: in this build the KV cache is "extensible" and is given its final size only after warm-up, but warm-up itself commits KV blocks for its dummy requests, up to free memory minus a reserve of 10% (plus a margin, ~13 GiB here). The warm-up steps then need 9–12 GiB of activations plus allocator growth. With bf16's 13 cache groups the commit usually stays small; with FP8's 99 groups (one per layer and loop pass) it reaches the limit. A debug log of FP8 at 512K shows `Committed 197731 of 227708 KV cache blocks (48.28 GiB physical)` seconds before the 3.8 GiB logits buffer fails to allocate.
 
-Fix (`patch/vllm/v1/worker/extensible_kv_cache.py`): `KV_CACHE_WARMUP_RESERVE_FRACTION` 0.10 → 0.25. It only bounds what warm-up may commit (6.9 GiB in the same FP8 start afterwards); the final cache is still sized from the memory measured after warm-up.
+Fix (`patch/vllm/v1/worker/extensible_kv_cache.py`): `KV_CACHE_WARMUP_RESERVE_FRACTION` 0.10 → 0.25. It only bounds what warm-up may commit: the limit is headroom × (1 − 1.75 × fraction), so 82.5% of the 58.5 GiB headroom before (48.3 GiB) and 56.25% after (32.9 GiB in the same FP8 start), which leaves 25.6 GiB instead of 10.2 GiB for the warm-up steps; the final cache is still sized from the memory measured after warm-up.
 
 ### The request limit
 
