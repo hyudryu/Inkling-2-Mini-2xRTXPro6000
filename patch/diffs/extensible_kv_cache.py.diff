@@ -1,0 +1,16 @@
+--- a/vllm/v1/worker/extensible_kv_cache.py
++++ b/vllm/v1/worker/extensible_kv_cache.py
+@@ -71,7 +71,12 @@
+ KV_CACHE_NON_TORCH_RESERVE_BYTES = (2 if current_platform.is_rocm() else 1) << 29
+ # Share of the headroom warmup leaves uncommitted, on top of the profiled
+ # activation peak, for transients the profiling run does not exercise.
+-KV_CACHE_WARMUP_RESERVE_FRACTION = 0.1
++# Patched from 0.1: the warmup steps here need 9-12 GiB of activations plus
++# allocator growth, more than a 10% reserve (and its margin) leaves once a
++# layout with many cache groups (FP8 KV: one per layer) commits blocks up to
++# the limit. This only bounds what warmup may commit; the final cache is
++# still sized from the memory measured after warmup.
++KV_CACHE_WARMUP_RESERVE_FRACTION = 0.25
+ 
+ 
+ class ExtensibleKVCache:
