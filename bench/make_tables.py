@@ -68,7 +68,7 @@ for (n, c), cur in sorted(ctx[runs[-1]].items()):
     vals = [ctx[r].get((n, c), {}).get("steady_aggregate_tps") for r in runs]
     cells = [("—" if v is None else f"{v:.1f}") for v in vals]
     cells[-1] = f"**{cells[-1]}**"
-    change = pct(vals[-1], vals[0]) if vals[0] else "—"
+    change = pct(vals[-1], vals[0]) if vals[0] and vals[-1] else "—"
     print(row([f"{n // 1024}K", str(c)] + cells + [change, f"{cur['per_req_decode_tps_median']:.1f}", f"{cur['ttft_median_s']:.1f}"]))
 
 # Power for the current run.

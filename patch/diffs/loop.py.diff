@@ -1,0 +1,25 @@
+--- a/vllm/models/inkling2/nvidia/loop.py
++++ b/vllm/models/inkling2/nvidia/loop.py
+@@ -29,6 +29,7 @@
+ from .ops.attn_res import attn_res
+ from .ops.linear import linear_k_groups
+ from .ops.loop import blend_rms_norm, pair_rms_norm
++from .ops.loop_fused import stream_linear_k_groups, use_stream_linear
+ from .sconv import conv_metadata
+ 
+ LOOP_STREAMS = ("attn", "k", "v", "mlp")
+@@ -121,7 +122,13 @@
+         broadcast over streams) and `message`, each output RMS-normalized
+         with its row of `norm_weight` `(S, D)`: bf16 `(S, T, D)`."""
+         pair = pair_rms_norm(dest, message)
+-        hidden = torch.bmm(pair, self.controller_down[streams].transpose(1, 2))
++        down = self.controller_down[streams]
++        if pair.shape[0] > 1 and use_stream_linear(pair, down):
++            # All streams' reference K-group projection in two launches;
++            # cuBLAS runs this small batched product several times slower.
++            hidden = stream_linear_k_groups(pair, down)
++        else:
++            hidden = torch.bmm(pair, down.transpose(1, 2))
+         gain_forget = torch.bmm(
+             hidden,
+             self.controller_gain_forget[streams].transpose(1, 2),

@@ -10,7 +10,7 @@ PREFILL_SIZES=${PREFILL_SIZES:-1024,4096,8192,16384,32768,65536,131072}
 CONTEXTS=${CONTEXTS:-8192,16384,32768,65536,131072}
 LEVELS=${LEVELS:-1,2,4,8,16,32}
 mkdir -p "$HERE/$OUT" && cd "$HERE/$OUT"
-B="python3 -I $HERE/bench.py --model $MODEL"
+B="python3 -I $HERE/bench.py --url ${URL:-http://localhost:8000} --model $MODEL"
 nvidia-smi -i ${GPU:-0} --query-gpu=timestamp,index,power.draw,temperature.gpu,clocks.sm --format=csv,noheader,nounits -lms 1000 > power.csv &
 PW=$!
 trap 'kill $PW 2>/dev/null' EXIT
