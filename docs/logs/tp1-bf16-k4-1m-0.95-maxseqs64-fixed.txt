@@ -1,0 +1,6 @@
+INFO 11-21 05:34:05 [model_runner.py:455] Model loading took 19.54 GiB memory and 1.838975 seconds
+INFO 11-21 05:34:28 [gpu_worker.py:847] Available KV cache memory: 68.35 GiB
+INFO 11-21 05:37:40 [gpu_worker.py:1230] Free memory on device (94.21/94.97 GiB) on startup. Desired GPU memory utilization is (0.95, 90.22 GiB). Actual usage is 19.94 GiB for consumed memory (weights + non-torch), 1.93 GiB for peak activation, and 1.08 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=72072707687` (67.12 GiB) to fit into requested memory, or `--kv-cache-memory=76356245504` (71.11 GiB) to fully utilize gpu memory. Current kv cache memory in use is 68.35 GiB.
+INFO 11-21 05:37:41 [extensible_kv_cache.py:698] Memory after warmup: 72.77 GiB free, 0.02 GiB committed to the KV cache, 4.72 GiB kept for transient activations (2.44 GiB allocated at peak, 4.72 GiB of torch reservation growth); 29160 KV cache blocks (64.07 GiB) fit within the requested 90.22 GiB. Torch may reserve up to 28.99 GiB.
+INFO 11-21 05:37:41 [kv_cache_utils.py:1134] GPU KV cache size: 1,276,200 tokens, Maximum concurrency for 1,048,576 tokens per request: 1.22x
+INFO 11-21 05:37:41 [extensible_kv_cache.py:541] Extended KV cache to 29160 blocks (64.07 GiB).

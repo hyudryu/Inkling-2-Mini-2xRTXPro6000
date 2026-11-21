@@ -16,6 +16,9 @@ HF_CACHE=${HF_CACHE:-$HOME/.cache/huggingface}
 PORT=${PORT:-8000}
 GPU=${GPU:-0}
 TP=${TP:-1}
+# vLLM defaults to 1024 concurrent requests on a card this size and preallocates
+# block tables for all of them; see README "The request limit".
+MAX_SEQS=${MAX_SEQS:-64}
 if [ "$TP" = 2 ]; then
   # The custom all-reduce is in the SM100-only _C extension; NCCL works.
   GPUS=all; CTX=1048576; UTIL=0.95; EXTRA=(--disable-custom-all-reduce)
@@ -41,7 +44,7 @@ docker run -d --name inkling-2-mini --gpus "$GPUS" --ipc=host -p "$PORT:8000" \
   serve thinkingmachines/Inkling-2-Mini --revision 1fb4134b9a74f9681054f4ef82e4bf1f458a2337 \
     --host 0.0.0.0 --port 8000 --served-model-name inkling-2-mini \
     --tensor-parallel-size "$TP" --gpu-memory-utilization "$UTIL" \
-    --max-model-len "$CTX" \
+    --max-model-len "$CTX" --max-num-seqs "$MAX_SEQS" \
     --reasoning-parser inkling \
     --speculative-config '{"method":"dspark","num_speculative_tokens":4,"draft_sample_method":"probabilistic"}' \
     --enable-prompt-tokens-details "${EXTRA[@]}" "$@"

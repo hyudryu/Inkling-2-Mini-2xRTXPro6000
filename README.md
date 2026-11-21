@@ -18,6 +18,7 @@ Every result names its configuration: **TP1** is one GPU, **TP2** is two GPUs wi
 | Prefill, 500K prompt (tok/s) | 5,218 | 5,403 | **8,418** |
 | Draft tokens per step (K) | 7 | 4 | 4 |
 | Largest max context that starts (bf16 KV, with the warm-up fix) | 1M | 1M | 1M |
+| Reported KV pool at 1M, 0.95, 64 requests: bf16 / FP8 | — | 1.28M / 1.97M | 2.31M / 3.24M |
 | KV cost per token, bf16 / FP8 (measured) | 36 KiB / — | 36 KiB / 20 KiB | 36 KiB / 20 KiB |
 
 ## Setup
@@ -46,6 +47,7 @@ Extra vLLM flags are passed through, for example `./recipe/run.sh --max-model-le
 | `--reasoning-parser` | `inkling` | same | From the official recipe |
 | `--max-model-len` | 524288 | 1048576 | Per-session limit. Set it to what a session needs; the rest of the KV cache serves concurrent sessions |
 | `--gpu-memory-utilization` | 0.95 | 0.95 | Safe with the warm-up fix below; without it, 0.90+ runs out of memory during warm-up |
+| `--max-num-seqs` | 64 | 64 | The default of 1024 preallocates block tables that take 4–29+ GiB from the KV cache (see "The request limit") |
 | `--disable-custom-all-reduce` | — | set | The custom all-reduce is in the SM100-only `_C` extension; NCCL is used instead |
 | `--revision` | pinned | pinned | The HF cache has no `refs/main` for an offline start without it |
 
@@ -199,22 +201,32 @@ Cause: in this build the KV cache is "extensible" and is given its final size on
 
 Fix (`patch/vllm/v1/worker/extensible_kv_cache.py`): `KV_CACHE_WARMUP_RESERVE_FRACTION` 0.10 → 0.25. It only bounds what warm-up may commit (6.9 GiB in the same FP8 start afterwards); the final cache is still sized from the memory measured after warm-up.
 
-Start-up results with the fix, `--gpu-memory-utilization 0.95`, `--max-model-len 1048576` (no benchmark; the lines vLLM printed are in `docs/logs/`):
+### The request limit
 
-| Config | Starts? | KV memory | Reported pool |
-|---|---|---|---|
-| TP1, bf16, K=7 | Yes | 53.4 GiB | 1,064,375 (1.02 × 1M) |
-| TP1, bf16, K=4 (V1) | Yes | 52.8 GiB | 1,051,070 (1.00 × 1M) |
-| TP1, FP8, K=4 (V1) | No, short by 0.75 GiB | 32.6 GiB available, 33.4 needed | max context it would accept: 1,009,344 |
-| TP1, FP8, K=7 | No, short by 0.44 GiB | 33.0 GiB available, 33.4 needed | max context it would accept: 1,025,408 |
-| TP2, bf16, K=4 (V1) | Yes | 51.75 GiB per card | 1,640,770 (1.56 × 1M) |
-| TP2, FP8, K=4 (V1) | No | 18.3 GiB per card available, 22.7 needed | max context it would accept: 584,576 |
+On a card this size vLLM defaults to `--max-num-seqs 1024`, and for every request slot it preallocates two GPU block tables per cache group, each as long as the max context needs. bf16 KV uses 13 cache groups, so at a 1M max context that is about 4 GiB. FP8 KV uses 99 groups (one per layer and loop pass), so it is about 29 GiB on TP1 and more per card on TP2, taken straight out of the KV cache. That is why FP8 mode appeared to have less cache than bf16, and why TP2 FP8 could not start at 1M.
 
-So with the fix, bf16 fits the full 1M context on one card. FP8 no longer crashes, but at a 1M max context FP8 mode has far less memory free after warm-up than bf16 (43 GiB against 66.5 GiB on TP1; 27.5 GiB against 71.9 GiB per card on TP2). That overhead grows with the max-context setting, is not affected by `--max-num-seqs`, and is unexplained so far.
+Setting a realistic limit removes it and also shrinks warm-up (its buffers scale with the limit). The recipe uses `--max-num-seqs 64`.
+
+Start-up results with the warm-up fix, `--gpu-memory-utilization 0.95`, `--max-model-len 1048576`, V1 patch (K=4). No benchmark; the lines vLLM printed are in `docs/logs/`:
+
+| Config | Default limit (1024) | `--max-num-seqs 64` |
+|---|---|---|
+| TP1 V1, bf16 KV | Starts: 52.8 GiB KV, pool 1,051,070 (1.00 × 1M) | Starts: 64.1 GiB KV, pool 1,276,200 (1.22 × 1M) |
+| TP1 V1, FP8 KV | Does not start: 32.6 GiB available, 33.4 needed | Starts: 62.6 GiB KV, pool 1,966,068 (1.87 × 1M) |
+| TP2 V1, bf16 KV | Starts: 51.75 GiB per card, pool 1,640,770 (1.56 × 1M) | Starts: 72.9 GiB per card, pool 2,311,235 (2.20 × 1M) |
+| TP2 V1, FP8 KV | Does not start: 18.3 GiB per card available, 22.7 needed | Starts: 70.1 GiB per card, pool 3,239,785 (3.09 × 1M) |
+
+TP1 bf16 with the recipe's K=7 also starts at the default limit (53.4 GiB, pool 1,064,375), and TP1 FP8 with K=7 misses by 0.44 GiB. With a limit of 16, TP1 FP8 gets 65.0 GiB (pool 2,040,351).
+
+At the measured per-token costs, the `--max-num-seqs 64` caches hold about 1.87M tokens (TP1 bf16) and 3.28M tokens (TP1 FP8) of finished context.
+
+For serving, set `--max-model-len` to the longest session you need and leave the rest to concurrency: TP1 V1 with bf16 KV, a 400,000-token limit, 0.95 and 64 requests comes up with 64.5 GiB of KV cache (reported pool 849,707, 2.12 × 400K) and the same step times as the benchmark (9.95 / 17.1 / 25.3 ms at 1 / 8 / 32 users).
+
+Note for SparkDeck: an extra `--max-num-seqs` argument is dropped; set the deployment's max concurrency instead.
 
 ### FP8 KV against bf16 KV
 
-Like for like on TP1 V1 (K=4, warm-up fix applied, `--gpu-memory-utilization 0.85`, 512K max context):
+Like for like on TP1 V1 (K=4, warm-up fix applied, default request limit, `--gpu-memory-utilization 0.85`, 512K max context):
 
 | | TP1 V1, bf16 KV | TP1 V1, FP8 KV |
 |---|---|---|
@@ -232,7 +244,7 @@ Speed and recall (FP8 runs at a 262K max context, before the fix was found; bf16
 | Prefill, 128K / 256K (tok/s) | 12,288 / 8,281 | 10,754 / 7,507 | 14,795 / 12,595 | 15,676 / 11,875 |
 | Recall at 29K / 119K / 239K tokens | 30/30 each | 30/30 each | 30/30 each | 30/30 each |
 
-FP8 KV costs 44% less per token, decodes at the same speed, and passed the recall check (`bench/recall.py`: 10 exact lookups in a numbered log, 3 trials per size, temperature 0). Long-prompt prefill was 9–12% slower on TP1 and within ±6% on TP2 (two sweeps each; shorter sizes hit one-off kernel compiles on the fresh servers and are left out). It is lossy, and this check is narrow; it is not a quality evaluation. In this build FP8 also gets about 11 GiB less cache than bf16 at 512K and cannot start at 1M, so its real advantage today is more concurrent mid-length sessions, not longer ones. Mixed precision (FP8 keys, bf16 values) is not supported: K and V share one cache tensor.
+FP8 KV costs 44% less per token, decodes at the same speed, and passed the recall check (`bench/recall.py`: 10 exact lookups in a numbered log, 3 trials per size, temperature 0). Long-prompt prefill was 9–12% slower on TP1 and within ±6% on TP2 (two sweeps each; shorter sizes hit one-off kernel compiles on the fresh servers and are left out). It is lossy, and this check is narrow; it is not a quality evaluation. At the default request limit FP8 gets about 11 GiB less cache than bf16 here (see "The request limit"); with `--max-num-seqs 64` the two get nearly the same memory and FP8 holds about 1.75× the tokens. Mixed precision (FP8 keys, bf16 values) is not supported: K and V share one cache tensor.
 
 ## The patch
 
@@ -360,6 +372,5 @@ TP1 Baseline averaged 443 / 422 / 427 W and TP1 V1 434 / 413 / 437 W on one card
 
 ## Next
 
-- Find what FP8 KV mode holds at large max-context settings, so FP8 can use its smaller cache for long contexts.
 - A faster all-reduce for TP2 on SM120 (the custom one needs an SM120 build of `_C`).
 - The prefill KV spike: sliding-window and conv-state groups pay full-size blocks for in-flight chunks.
