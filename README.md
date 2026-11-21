@@ -2,11 +2,11 @@
 
 A tested recipe for serving [thinkingmachines/Inkling-2-Mini](https://huggingface.co/thinkingmachines/Inkling-2-Mini) with vLLM on one or two NVIDIA RTX PRO 6000 Blackwell Workstation Edition GPUs (SM120, 96 GB each), with the DSpark speculator that ships in the checkpoint.
 
-Every result names its configuration: **TP1** is one GPU, **TP2** is two GPUs with tensor parallelism; **Baseline** is the official vLLM recipe plus the fixes SM120 needs to start, **V1** is the optimized patch in this repo. Same weights throughout; nothing is quantized unless a row says FP8 KV.
+Every result names its configuration: **TP1** is one GPU, **TP2** is two GPUs with tensor parallelism; **Baseline** is the official vLLM recipe plus the fixes SM120 needs to start, **V1** is the optimized patch in this repo. Same weights throughout. Every speed in this README was measured with the default **bf16 KV cache** unless the row or column says FP8 KV; nothing else is quantized.
 
 ## TL;DR
 
-| | TP1 Baseline | TP1 V1 | TP2 V1 |
+| | TP1 Baseline (bf16 KV) | TP1 V1 (bf16 KV) | TP2 V1 (bf16 KV) |
 |---|---|---|---|
 | Decode step, 1 user | 11.5 ms | 10.0 ms | **7.9 ms** |
 | Decode step, 8 users | 19.6 ms | 17.2 ms | **13.1 ms** |
@@ -77,7 +77,7 @@ Changes 2–5 alone (still K=7) take the single-user step from 11.46 to 10.63 ms
 
 Stock vLLM only accepts K=7 for this checkpoint. With the patch the drafter runs a shorter block. Measured with `bench/step_matrix.py` (mean of prose, coding, counting; baseline kernels):
 
-| K | Step, 1 user | Step, 8 users | Step, 32 users | Tok/s at 1 / 8 / 32 users |
+| K (TP1, bf16 KV) | Step, 1 user | Step, 8 users | Step, 32 users | Tok/s at 1 / 8 / 32 users |
 |---|---|---|---|---|
 | 7 | 11.5 ms | 19.6 ms | 29.5 ms | 273 / 1,469 / 3,780 |
 | 5 | 11.2 ms | 18.5 ms | 27.0 ms | 277 / 1,393 / 3,802 |
@@ -163,7 +163,7 @@ If sessions never exceed about 400K tokens, set `--max-model-len 400000 --gpu-me
 
 Two cards double the memory bandwidth that bounds the step, and TP2 fits the full 1M context with room for more sessions. Measured with the V1 patch, K=4, bf16 KV, 1M max context (`bench/results/tp2-v1/`):
 
-| | TP1 V1 | TP2 V1 | Change |
+| | TP1 V1 (bf16 KV) | TP2 V1 (bf16 KV) | Change |
 |---|---|---|---|
 | Decode step, 1 / 8 / 32 users | 10.0 / 17.2 / 25.0 ms | 7.9 / 13.1 / 21.4 ms | −21% / −24% / −15% |
 | Mean tok/s at 1 / 8 / 32 users | 301 / 1,424 / 3,807 | 374 / 1,821 / 4,446 | +24% / +28% / +17% |
@@ -220,7 +220,7 @@ TP1 bf16 with the recipe's K=7 also starts at the default limit (53.4 GiB, pool 
 
 At the measured per-token costs, the `--max-num-seqs 64` caches hold about 1.87M tokens (TP1 bf16) and 3.28M tokens (TP1 FP8) of finished context.
 
-For serving, set `--max-model-len` to the longest session you need and leave the rest to concurrency: TP1 V1 with bf16 KV, a 400,000-token limit, 0.95 and 64 requests comes up with 64.5 GiB of KV cache (reported pool 849,707, 2.12 × 400K) and the same step times as the benchmark (9.95 / 17.1 / 25.3 ms at 1 / 8 / 32 users).
+For serving, set `--max-model-len` to the longest session you need and leave the rest to concurrency: TP1 V1 with bf16 KV, a 400,000-token limit, 0.95 and 64 requests comes up with 64.5 GiB of KV cache (reported pool 849,707, 2.12 × 400K) and the same step times as the benchmark (9.95 / 17.1 / 25.3 ms at 1 / 8 / 32 users). TP2 V1 with the same settings comes up with 73.5 GiB per card (reported pool 1,339,356, 3.35 × 400K) and 7.8 / 13.2 / 23.8 ms per step; the 32-user figure is slower than the 21.4 ms of the full benchmark, from one quick run.
 
 Note for SparkDeck: an extra `--max-num-seqs` argument is dropped; set the deployment's max concurrency instead.
 
@@ -268,7 +268,7 @@ Method (`bench/`, stdlib Python against the OpenAI endpoint): prefill is one req
 
 Run settings: TP1 Baseline is K=7, 0.85 utilization, 512K max context, on GPU 0. TP1 V1 is K=4, 0.75, 512K, on GPU 1. TP2 V1 is K=4, 0.85, 1M. These predate the warm-up fix; utilization changes the pool, not the speed. In the V1 runs, prefill sizes up to 64K were re-measured after the first pass, which hit one-off kernel compiles (first pass kept as `results-prefill-firstpass*.json`).
 
-**TP1 V1** (dashed: TP1 Baseline)
+**TP1 V1, bf16 KV** (dashed: TP1 Baseline, bf16 KV)
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="docs/charts/decode-aggregate-dark.svg"><img alt="TP1 V1 aggregate decode throughput vs concurrency" src="docs/charts/decode-aggregate-light.svg"></picture>
 
@@ -276,7 +276,7 @@ Run settings: TP1 Baseline is K=7, 0.85 utilization, 512K max context, on GPU 0.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="docs/charts/decode-context-dark.svg"><img alt="TP1 V1 aggregate decode throughput at long context" src="docs/charts/decode-context-light.svg"></picture>
 
-**TP2 V1** (dashed: TP1 Baseline)
+**TP2 V1, bf16 KV** (dashed: TP1 Baseline, bf16 KV)
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="docs/charts/tp2/decode-aggregate-dark.svg"><img alt="TP2 V1 aggregate decode throughput vs concurrency" src="docs/charts/tp2/decode-aggregate-light.svg"></picture>
 
@@ -288,7 +288,7 @@ In the tables below, "Change" compares the last column with TP1 Baseline, and th
 
 ### Prefill
 
-| Prompt tokens | TP1 Baseline tok/s | TP1 V1 tok/s | TP2 V1 tok/s | Change | Time to first token (s) |
+| Prompt tokens | TP1 Baseline (bf16 KV) tok/s | TP1 V1 (bf16 KV) tok/s | TP2 V1 (bf16 KV) tok/s | Change | Time to first token (s) |
 | --- | --- | --- | --- | --- | --- |
 | 1,030 | 15,311 | 19,511 | **20,394** | +33% | 0.05 |
 | 4,103 | 19,675 | 21,812 | **25,044** | +27% | 0.16 |
@@ -302,7 +302,7 @@ In the tables below, "Change" compares the last column with TP1 Baseline, and th
 
 ### Decode
 
-| Workload | C | TP1 Baseline tok/s | TP1 V1 tok/s | TP2 V1 tok/s | Change | Per-user tok/s | TTFT p50 (s) |
+| Workload | C | TP1 Baseline (bf16 KV) tok/s | TP1 V1 (bf16 KV) tok/s | TP2 V1 (bf16 KV) tok/s | Change | Per-user tok/s | TTFT p50 (s) |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Prose (short story) | 1 | 175.7 | 196.1 | **247.5** | +41% | 247.5 | 0.03 |
 |  | 2 | 298.9 | 350.8 | **449.1** | +50% | 225.2 | 0.03 |
@@ -327,7 +327,7 @@ DSpark during the decode matrix: TP1 Baseline 29.8% of draft tokens accepted, 3.
 
 ### Long-context decode
 
-| Context | C | TP1 Baseline tok/s | TP1 V1 tok/s | TP2 V1 tok/s | Change | Per-user tok/s | TTFT p50 (s) |
+| Context | C | TP1 Baseline (bf16 KV) tok/s | TP1 V1 (bf16 KV) tok/s | TP2 V1 (bf16 KV) tok/s | Change | Per-user tok/s | TTFT p50 (s) |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 8K | 1 | 178.2 | 191.1 | **249.4** | +40% | 249.4 | 0.3 |
 | 8K | 2 | 307.8 | 324.0 | **463.7** | +51% | 193.3 | 1.2 |
@@ -361,6 +361,8 @@ DSpark during the decode matrix: TP1 Baseline 29.8% of draft tokens accepted, 3.
 | 256K | 4 | — | — | **322.1** | — | 14.1 | 53.6 |
 
 ### Power
+
+All bf16 KV.
 
 | Phase | Avg / max power per GPU | Peak temp |
 | --- | --- | --- |

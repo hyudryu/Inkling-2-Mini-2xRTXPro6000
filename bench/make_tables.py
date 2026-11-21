@@ -10,7 +10,7 @@ import csv, datetime, json, os, statistics, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 runs = sys.argv[1:] or ["baseline"]
-LABELS = {"baseline": "TP1 Baseline", "v1": "TP1 V1", "tp2-v1": "TP2 V1", "v1-fp8kv": "TP1 V1 + FP8 KV", "tp2-v1-fp8kv": "TP2 V1 + FP8 KV"}
+LABELS = {"baseline": "TP1 Baseline (bf16 KV)", "v1": "TP1 V1 (bf16 KV)", "tp2-v1": "TP2 V1 (bf16 KV)", "v1-fp8kv": "TP1 V1 (FP8 KV)", "tp2-v1-fp8kv": "TP2 V1 (FP8 KV)"}
 label = lambda r: LABELS.get(r, r.upper())
 load = lambda r, f: json.load(open(os.path.join(HERE, "results", r, f)))
 pct = lambda new, old: "—" if len(runs) == 1 else f"{(new / old - 1) * 100:+.0f}%"

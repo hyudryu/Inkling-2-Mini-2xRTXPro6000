@@ -11,7 +11,7 @@ OUT = os.path.join(HERE, "..", "docs", "charts", os.environ.get("CHART_SUBDIR", 
 RESULTS = os.path.join(HERE, "results", os.environ.get("RESULTS", "baseline"))      # charted run
 BASELINE = os.path.join(HERE, "results", "baseline")                          # dashed comparison
 _run = os.path.basename(RESULTS)
-MODEL_LABEL = "Inkling-2-Mini + DSpark, " + {"baseline": "TP1 Baseline", "v1": "TP1 V1", "tp2-v1": "TP2 V1"}.get(_run, _run.upper())
+MODEL_LABEL = "Inkling-2-Mini + DSpark, " + {"baseline": "TP1 Baseline", "v1": "TP1 V1", "tp2-v1": "TP2 V1"}.get(_run, _run.upper()) + ", bf16 KV"
 HARDWARE = os.environ.get("HARDWARE", "1× RTX PRO 6000 @ 450 W")
 LABEL_NUDGE = {}  # per-series (dx, dy) for the context chart end labels; tune after a render
 
@@ -145,7 +145,7 @@ def main():
         base = json.load(open(os.path.join(BASELINE, "results-decode.json")))["decode"]
     bget = lambda w, c, k: next(r[k] for r in base if r["workload"] == w and r["concurrency"] == c)
     ghost = lambda k: [(i, [bget(w, c, k) for c in levels]) for i, (w, _) in enumerate(wl)] if base else None
-    note = "TP1 Baseline (dashed)" if base else None
+    note = "TP1 Baseline, bf16 KV (dashed)" if base else None
     wl = [("prose", "Prose"), ("coding", "Coding"), ("counting", "Counting")]
     charts = {
         "decode-aggregate": dict(
