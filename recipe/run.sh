@@ -46,6 +46,7 @@ docker run -d --name inkling-2-mini --gpus "$GPUS" --ipc=host -p "$PORT:8000" \
     --tensor-parallel-size "$TP" --gpu-memory-utilization "$UTIL" \
     --max-model-len "$CTX" --max-num-seqs "$MAX_SEQS" \
     --reasoning-parser inkling \
+    --enable-auto-tool-choice --tool-call-parser inkling \
     --speculative-config '{"method":"dspark","num_speculative_tokens":4,"draft_sample_method":"probabilistic"}' \
     --enable-prompt-tokens-details "${EXTRA[@]}" "$@"
 

@@ -45,6 +45,7 @@ Extra vLLM flags are passed through, for example `./recipe/run.sh --max-model-le
 |---|---|---|---|
 | `--speculative-config` | `dspark`, 4 tokens, probabilistic | same | Recipe uses 7; see "Draft length". Needs the patched `dspark.py` |
 | `--reasoning-parser` | `inkling` | same | From the official recipe |
+| `--enable-auto-tool-choice`, `--tool-call-parser` | `inkling` | same | Tool calling through the OpenAI `tools` field |
 | `--max-model-len` | 524288 | 1048576 | Per-session limit. Set it to what a session needs; the rest of the KV cache serves concurrent sessions |
 | `--gpu-memory-utilization` | 0.95 | 0.95 | Safe with the warm-up fix below; without it, 0.90+ runs out of memory during warm-up |
 | `--max-num-seqs` | 64 | 64 | The default of 1024 preallocates block tables that take 4–29+ GiB from the KV cache (see "The request limit") |
