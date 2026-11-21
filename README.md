@@ -14,7 +14,7 @@ A tested recipe for serving [thinkingmachines/Inkling-2-Mini](https://huggingfac
 | Prefill, 4K–16K prompt | ~19,000–19,800 tok/s |
 | Prefill, 128K / 500K prompt | 11,826 / 5,218 tok/s (TTFT 11 s / 96 s) |
 | Max context | 524,288 tokens |
-| KV pool | 671,695 tokens (1.28 × 512K requests) |
+| KV pool | 671,695 tokens reported; ~1.29M measured (see below) |
 | DSpark acceptance (K=7) | 30% of draft tokens, 3.1 tokens per step |
 | Power (450 W cap) | 422–443 W average |
 
@@ -138,15 +138,28 @@ DSpark during the decode matrix: 125,452 drafts, 262,111 of 878,164 draft tokens
 | Decode, C1–C32 | 422 / 464 W | 71 °C |
 | Long-context decode | 427 / 459 W | 72 °C |
 
-## Why the KV pool is 672K tokens
+## KV pool: reported 672K, actually ~1.29M tokens
 
-vLLM reports the pool as (number of full 512K-token requests that fit) × 512K = 1.28 × 524,288. The allocator holds 20,200 blocks of 64 tokens in 44.4 GiB. Of the 95 GiB card, 0.85 utilization caps vLLM at 80.7 GiB; weights and runtime take 23.2 GiB, and 9.5 GiB is kept for transient activations.
+vLLM reports the pool as (number of full 512K-token requests that fit) × 512K = 1.28 × 524,288. Its allocator holds 20,200 blocks of 64 tokens in 44.4 GiB (0.85 utilization caps vLLM at 80.7 GiB; weights and runtime take 23.2 GiB, and 9.5 GiB is kept for transient activations).
 
-The model stores far less per token than this suggests. The middle 12 of its 24 layers run three times with separate KV caches per pass, so the full-attention caches are layers 5 and 23 once and layers 11 and 17 three times each: 8 caches, plus 1 in the drafter, at 8 KV heads × 128 × K/V × bf16, about 36 KiB per token. The sliding-window layers keep only 1,024 tokens. A 512K request, though, reserves about 15,800 blocks, about twice its 8,192 tokens' worth. vLLM's hybrid KV-cache planner groups caches into equal-sized groups and pads uneven ones (its log warns of up to 350% waste in one group), so the full-attention caches seem to end up in two padded groups. Fixing that grouping is the first V1 target.
+Measured with one request at a time, reading `vllm:kv_cache_usage_perc` once prefill has finished:
+
+| Prompt tokens | KV usage while decoding | Peak during prefill |
+|---|---|---|
+| 8,257 | 1.27% | 1.3% |
+| 55,101 | 4.89% | 41.3% |
+| 164,909 | 13.40% | 50.2% |
+| 330,156 | 26.17% | 62.9% |
+
+Steady-state usage grows by 7.7e-5 % per token, so the pool holds about 1.29M tokens. That is ~36 KiB per token, exactly the model's own footprint: the middle 12 of its 24 layers run three times with a KV cache per pass, giving 8 full-attention caches (layers 5 and 23 once, 11 and 17 three times), plus 1 in the drafter, each 8 KV heads × 128 × K/V × bf16 = 4 KiB per token. Sliding-window layers keep only 1,024 tokens. So the memory isn't wasted; the 672K figure (and the "1M needs 52.6 GiB" startup check) overstate what a request needs by about 1.5×.
+
+Two things do cost capacity:
+- Any prompt longer than one 8K prefill chunk briefly takes ~38% of the pool as soon as prefill starts, plus ~1.3% per chunk, and gives it back when prefill ends. Concurrent long prefills compete for that headroom.
+- Admission and the max-length check use the conservative per-request estimate, so the full 1M context is rejected at startup even though it would fit.
 
 ## Next (V1 targets, lossless only)
 
-- KV-cache grouping, so full-attention caches don't pay for padding layers (could roughly double the pool)
+- KV accounting: make vLLM's per-request estimate and the prefill transient match the measured ~36 KiB/token, so 1M context fits on one card and long prompts can run concurrently
 - Activation headroom: shrink the 9.5 GiB transient reserve (for example the sampler's warm-up batch) so utilization can go back to 0.90+
 - Profile the decode step at C1 and C32
 - DSpark draft length (K=7 at 30% acceptance)
