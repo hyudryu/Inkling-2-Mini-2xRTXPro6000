@@ -1,0 +1,23 @@
+{
+ "meta": {
+  "url": "http://localhost:8000",
+  "model": "inkling-2-mini",
+  "time": "2026-11-20T19:00:12-0800",
+  "tokens_per_filler_word": 2.1255,
+  "continuous_usage_stats": true,
+  "max_tokens": 1024,
+  "context_max_tokens": 512,
+  "rounds": 2,
+  "pool_tokens": 0,
+  "seed_offset": 41
+ },
+ "prefill": [
+  {
+   "target_tokens": 1000000,
+   "prompt_tokens": 998452,
+   "cached_tokens": 0,
+   "ttft_s": 201.1466011070006,
+   "prefill_tps": 4963.802492833921
+  }
+ ]
+}

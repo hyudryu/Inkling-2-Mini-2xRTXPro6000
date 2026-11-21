@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 430" width="760" height="430" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" role="img" aria-label="Aggregate decode throughput at long context">
 <rect width="760" height="430" rx="8" fill="#fcfcfb"/>
 <text x="24" y="30" font-size="17" font-weight="600" fill="#0b0b0b">Aggregate decode throughput at long context</text>
-<text x="24" y="51" font-size="12.5" fill="#52514e">Prose task after a unique N-token document · 512 output tokens · lines end where the 672K-token KV pool is full</text>
+<text x="24" y="51" font-size="12.5" fill="#52514e">Prose task after a unique N-token document · 512 output tokens · lines end where the 549K-token KV pool is full</text>
 <circle cx="30.0" cy="72.0" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <text x="41" y="76" font-size="12.5" fill="#52514e">8K ctx</text>
 <rect x="98.6" y="67.4" width="9.2" height="9.2" rx="1.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
@@ -14,14 +14,16 @@
 <text x="362.6" y="76" font-size="12.5" fill="#52514e">256K ctx</text>
 <line x1="64" x2="610" y1="374.0" y2="374.0" stroke="#c3c2b7" stroke-width="1"/>
 <text x="54" y="378.0" font-size="11.5" text-anchor="end" fill="#898781">0</text>
-<line x1="64" x2="610" y1="303.5" y2="303.5" stroke="#e1e0d9" stroke-width="1"/>
-<text x="54" y="307.5" font-size="11.5" text-anchor="end" fill="#898781">500</text>
-<line x1="64" x2="610" y1="233.0" y2="233.0" stroke="#e1e0d9" stroke-width="1"/>
-<text x="54" y="237.0" font-size="11.5" text-anchor="end" fill="#898781">1000</text>
-<line x1="64" x2="610" y1="162.5" y2="162.5" stroke="#e1e0d9" stroke-width="1"/>
-<text x="54" y="166.5" font-size="11.5" text-anchor="end" fill="#898781">1500</text>
+<line x1="64" x2="610" y1="317.6" y2="317.6" stroke="#e1e0d9" stroke-width="1"/>
+<text x="54" y="321.6" font-size="11.5" text-anchor="end" fill="#898781">500</text>
+<line x1="64" x2="610" y1="261.2" y2="261.2" stroke="#e1e0d9" stroke-width="1"/>
+<text x="54" y="265.2" font-size="11.5" text-anchor="end" fill="#898781">1000</text>
+<line x1="64" x2="610" y1="204.8" y2="204.8" stroke="#e1e0d9" stroke-width="1"/>
+<text x="54" y="208.8" font-size="11.5" text-anchor="end" fill="#898781">1500</text>
+<line x1="64" x2="610" y1="148.4" y2="148.4" stroke="#e1e0d9" stroke-width="1"/>
+<text x="54" y="152.4" font-size="11.5" text-anchor="end" fill="#898781">2000</text>
 <line x1="64" x2="610" y1="92.0" y2="92.0" stroke="#e1e0d9" stroke-width="1"/>
-<text x="54" y="96.0" font-size="11.5" text-anchor="end" fill="#898781">2000</text>
+<text x="54" y="96.0" font-size="11.5" text-anchor="end" fill="#898781">2500</text>
 <text x="18" y="233.0" font-size="11.5" fill="#898781" text-anchor="middle" transform="rotate(-90 18 233.0)">Output tokens/s (all requests)</text>
 <text x="109.5" y="396" font-size="12" text-anchor="middle" fill="#52514e">C1</text>
 <text x="200.5" y="396" font-size="12" text-anchor="middle" fill="#52514e">C2</text>
@@ -30,34 +32,33 @@
 <text x="473.5" y="396" font-size="12" text-anchor="middle" fill="#52514e">C16</text>
 <text x="564.5" y="396" font-size="12" text-anchor="middle" fill="#52514e">C32</text>
 <text x="337.0" y="418" font-size="11.5" text-anchor="middle" fill="#898781">Concurrent requests</text>
-<polyline points="109.5,348.9 200.5,330.6 291.5,306.0 382.5,251.8 473.5,206.2 564.5,147.4" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="109.5" cy="348.9" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="200.5" cy="330.6" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="291.5" cy="306.0" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="382.5" cy="251.8" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="473.5" cy="206.2" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="564.5" cy="147.4" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<polyline points="109.5,351.1 200.5,336.8 291.5,314.1 382.5,287.1 473.5,241.2" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<rect x="104.9" y="346.5" width="9.2" height="9.2" rx="1.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
-<rect x="195.9" y="332.2" width="9.2" height="9.2" rx="1.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
-<rect x="286.9" y="309.5" width="9.2" height="9.2" rx="1.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
-<rect x="377.9" y="282.5" width="9.2" height="9.2" rx="1.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
-<rect x="468.9" y="236.6" width="9.2" height="9.2" rx="1.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
-<polyline points="109.5,351.0 200.5,337.0 291.5,324.6 382.5,303.4" fill="none" stroke="#1baf7a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M109.5,345.0 L115.1,355.0 L103.9,355.0 Z" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2" stroke-linejoin="round"/>
-<path d="M200.5,331.0 L206.1,341.0 L194.9,341.0 Z" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2" stroke-linejoin="round"/>
-<path d="M291.5,318.6 L297.1,328.6 L285.9,328.6 Z" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2" stroke-linejoin="round"/>
-<path d="M382.5,297.4 L388.1,307.4 L376.9,307.4 Z" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="109.5,353.4 200.5,344.2 291.5,334.8" fill="none" stroke="#eda100" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M109.5,347.2 L115.7,353.4 L109.5,359.6 L103.3,353.4 Z" fill="#eda100" stroke="#fcfcfb" stroke-width="2" stroke-linejoin="round"/>
-<path d="M200.5,338.0 L206.7,344.2 L200.5,350.4 L194.3,344.2 Z" fill="#eda100" stroke="#fcfcfb" stroke-width="2" stroke-linejoin="round"/>
-<path d="M291.5,328.6 L297.7,334.8 L291.5,341.0 L285.3,334.8 Z" fill="#eda100" stroke="#fcfcfb" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="109.5,357.8 200.5,353.2" fill="none" stroke="#e87ba4" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M109.5,363.8 L115.1,353.8 L103.9,353.8 Z" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2" stroke-linejoin="round"/>
-<path d="M200.5,359.2 L206.1,349.2 L194.9,349.2 Z" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2" stroke-linejoin="round"/>
-<text x="576.5" y="151.4" font-size="12.5" fill="#0b0b0b"><tspan font-weight="600">1607</tspan><tspan fill="#52514e"> 8K ctx</tspan></text>
-<text x="485.5" y="245.2" font-size="12.5" fill="#0b0b0b"><tspan font-weight="600">942</tspan><tspan fill="#52514e"> 32K ctx</tspan></text>
-<text x="394.5" y="307.4" font-size="12.5" fill="#0b0b0b"><tspan font-weight="600">501</tspan><tspan fill="#52514e"> 64K ctx</tspan></text>
-<text x="303.5" y="338.8" font-size="12.5" fill="#0b0b0b"><tspan font-weight="600">278</tspan><tspan fill="#52514e"> 128K ctx</tspan></text>
-<text x="212.5" y="357.2" font-size="12.5" fill="#0b0b0b"><tspan font-weight="600">148</tspan><tspan fill="#52514e"> 256K ctx</tspan></text>
+<polyline points="109.5,352.4 200.5,337.5 291.5,315.5 382.5,275.8 473.5,215.6 564.5,156.8" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="109.5" cy="352.4" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="200.5" cy="337.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="291.5" cy="315.5" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="382.5" cy="275.8" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="473.5" cy="215.6" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="564.5" cy="156.8" r="5" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<polyline points="109.5,353.9 200.5,337.3 291.5,323.5 382.5,299.5" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="104.9" y="349.3" width="9.2" height="9.2" rx="1.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<rect x="195.9" y="332.7" width="9.2" height="9.2" rx="1.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<rect x="286.9" y="318.9" width="9.2" height="9.2" rx="1.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<rect x="377.9" y="294.9" width="9.2" height="9.2" rx="1.5" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<polyline points="109.5,355.7 200.5,343.7 291.5,330.4" fill="none" stroke="#1baf7a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M109.5,349.7 L115.1,359.7 L103.9,359.7 Z" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2" stroke-linejoin="round"/>
+<path d="M200.5,337.7 L206.1,347.7 L194.9,347.7 Z" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2" stroke-linejoin="round"/>
+<path d="M291.5,324.4 L297.1,334.4 L285.9,334.4 Z" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="109.5,357.7 200.5,346.8 291.5,336.8" fill="none" stroke="#eda100" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M109.5,351.5 L115.7,357.7 L109.5,363.9 L103.3,357.7 Z" fill="#eda100" stroke="#fcfcfb" stroke-width="2" stroke-linejoin="round"/>
+<path d="M200.5,340.6 L206.7,346.8 L200.5,353.0 L194.3,346.8 Z" fill="#eda100" stroke="#fcfcfb" stroke-width="2" stroke-linejoin="round"/>
+<path d="M291.5,330.6 L297.7,336.8 L291.5,343.0 L285.3,336.8 Z" fill="#eda100" stroke="#fcfcfb" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="109.5,360.4 200.5,354.5" fill="none" stroke="#e87ba4" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M109.5,366.4 L115.1,356.4 L103.9,356.4 Z" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2" stroke-linejoin="round"/>
+<path d="M200.5,360.5 L206.1,350.5 L194.9,350.5 Z" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2" stroke-linejoin="round"/>
+<text x="576.5" y="160.8" font-size="12.5" fill="#0b0b0b"><tspan font-weight="600">1926</tspan><tspan fill="#52514e"> 8K ctx</tspan></text>
+<text x="394.5" y="303.5" font-size="12.5" fill="#0b0b0b"><tspan font-weight="600">661</tspan><tspan fill="#52514e"> 32K ctx</tspan></text>
+<text x="303.5" y="334.4" font-size="12.5" fill="#0b0b0b"><tspan font-weight="600">386</tspan><tspan fill="#52514e"> 64K ctx</tspan></text>
+<path d="M298.5,336.8 L307.5,346.4 L311.5,346.4" fill="none" stroke="#898781" stroke-width="1"/>
+<text x="315.5" y="350.4" font-size="12.5" fill="#0b0b0b"><tspan font-weight="600">330</tspan><tspan fill="#52514e"> 128K ctx</tspan></text>
+<text x="212.5" y="358.5" font-size="12.5" fill="#0b0b0b"><tspan font-weight="600">172</tspan><tspan fill="#52514e"> 256K ctx</tspan></text>
 </svg>

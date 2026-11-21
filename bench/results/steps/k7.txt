@@ -1,0 +1,12 @@
+prose-C1      agg   174.5 tok/s | per-user  174.5 |  11.5 ms/step | 2.00 tok/step | accept 14%
+prose-C8      agg   857.1 tok/s | per-user  107.1 |  19.2 ms/step | 2.06 tok/step | accept 15%
+prose-C32     agg  2347.3 tok/s | per-user   73.4 |  27.7 ms/step | 2.03 tok/step | accept 15%
+coding-C1     agg   293.0 tok/s | per-user  293.0 |  11.6 ms/step | 3.40 tok/step | accept 34%
+coding-C8     agg  1361.3 tok/s | per-user  170.2 |  21.0 ms/step | 3.57 tok/step | accept 37%
+coding-C32    agg  3666.4 tok/s | per-user  114.6 |  30.9 ms/step | 3.54 tok/step | accept 36%
+counting-C1   agg   352.3 tok/s | per-user  352.3 |  11.3 ms/step | 3.98 tok/step | accept 43%
+counting-C8   agg  2187.2 tok/s | per-user  273.4 |  18.5 ms/step | 5.07 tok/step | accept 58%
+counting-C32  agg  5327.6 tok/s | per-user  166.5 |  29.8 ms/step | 4.96 tok/step | accept 57%
+mean C1: agg   273.3 | 11.46 ms/step | 3.13 tok/step
+mean C8: agg  1468.5 | 19.58 ms/step | 3.57 tok/step
+mean C32: agg  3780.4 | 29.49 ms/step | 3.51 tok/step

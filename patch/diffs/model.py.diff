@@ -1,0 +1,32 @@
+--- a/vllm/models/inkling2/nvidia/model.py
++++ b/vllm/models/inkling2/nvidia/model.py
+@@ -74,6 +74,7 @@
+ from .ops.gemv import sm12x_bf16_gemv, use_sm12x_bf16_gemv
+ from .ops.norm import rms_norm
+ from .ops.seq_parallel import SeqParallel
++from .ops.softcap import softcap_, use_fused_softcap
+ from .sconv import ATTN_STREAM, MLP_STREAM, Inkling2ShortConv, conv_metadata
+ from .vision import Inkling2VisionEncoder, VisionMetadata
+ 
+@@ -100,6 +101,21 @@
+             )
+         return super()._apply_head(lm_head, hidden_states, embedding_bias)
+ 
++    def forward(self, lm_head, hidden_states, embedding_bias=None, skip_gather=False):
++        # Same as LogitsProcessor.forward, with the soft-cap's three
++        # elementwise passes fused into one in-place kernel (bit-identical).
++        if self.logits_as_input or self.soft_cap is None:
++            return super().forward(lm_head, hidden_states, embedding_bias, skip_gather)
++        logits = self._get_logits(hidden_states, lm_head, embedding_bias, skip_gather)
++        if logits is not None:
++            if use_fused_softcap(logits):
++                softcap_(logits, self.soft_cap)
++            else:
++                logits = torch.tanh(logits / self.soft_cap) * self.soft_cap
++            if self.scale != 1.0:
++                logits *= self.scale
++        return logits
++
+ 
+ class Inkling2RMSNorm(nn.Module):
+     """RMSNorm; `num_inputs > 1` stacks the weights of per-input norms (the

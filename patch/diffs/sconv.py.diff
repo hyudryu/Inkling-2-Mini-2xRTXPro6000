@@ -1,0 +1,21 @@
+--- a/vllm/models/inkling2/nvidia/sconv.py
++++ b/vllm/models/inkling2/nvidia/sconv.py
+@@ -23,6 +23,7 @@
+ 
+ from .ops.allreduce import Inkling2AllReduceWorkspace, all_reduce_conv_mix
+ from .ops.conv_mix import conv_mix as fused_conv_mix
++from .ops.gemv import sm12x_bf16_gemv, use_sm12x_bf16_gemv
+ from .ops.linear import linear_k_groups
+ from .ops.sconv import short_conv
+ from .ops.seq_parallel import SeqParallel
+@@ -104,6 +105,10 @@
+             4,
+         ):
+             return linear_k_groups(x.contiguous(), self.weight_proj, x.dtype)
++        if x.shape[0] > 1 and use_sm12x_bf16_gemv(x, self.weight_proj):
++            # Bit-identical to cuBLAS for this shape and about twice as fast
++            # on SM12x for decode-sized batches.
++            return sm12x_bf16_gemv(x, self.weight_proj)
+         return nn.functional.linear(x, self.weight_proj)
+ 
+     def forward(

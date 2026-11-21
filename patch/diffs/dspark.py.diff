@@ -1,0 +1,46 @@
+--- a/vllm/models/inkling2/nvidia/dspark.py
++++ b/vllm/models/inkling2/nvidia/dspark.py
+@@ -47,6 +47,7 @@
+     rope_,
+     silu_and_mul,
+ )
++from .ops.gemv import sm12x_bf16_gemv, use_sm12x_bf16_gemv
+ from .ops.linear import linear
+ 
+ 
+@@ -382,6 +383,14 @@
+         weight = self.rnn_proj.weight[:, : 2 * self.markov_rank]
+         raw = torch.addmm(context, inputs, weight.T, out_dtype=torch.float32)
+         state, latent = markov_gate(raw, state)
++        if latent.shape[0] == 1 and use_sm12x_bf16_gemv(
++            latent, self.fold_weight, self.fold_bias
++        ):
++            # One request: cuBLAS runs this as a non-tensor-core gemv that is
++            # compute-bound even with the folded head in L2. The tensor-core
++            # GEMV is about 3x faster on the draft steps after the first.
++            # Draft-only: this changes draft logits by at most one bf16 ulp.
++            return state, sm12x_bf16_gemv(latent, self.fold_weight, self.fold_bias)
+         return state, torch.addmm(self.fold_bias, latent, self.fold_weight.T)
+ 
+ 
+@@ -465,11 +474,18 @@
+         config = vllm_config.speculative_config.draft_model_config.hf_config
+         assert isinstance(config, Inkling2DSparkConfig)
+         num_spec = vllm_config.speculative_config.num_speculative_tokens
+-        if num_spec != config.draft_block_size - 1:
++        if num_spec > config.draft_block_size - 1:
+             raise ValueError(
+-                "Inkling2 DSpark requires num_speculative_tokens = "
++                "Inkling2 DSpark supports num_speculative_tokens <= "
+                 f"{config.draft_block_size - 1} (the checkpoint's block size - 1)"
+             )
++        if num_spec < config.draft_block_size - 1:
++            # Short-block drafting: run the draft on an anchor plus num_spec
++            # masks instead of the checkpoint's full block. Verification is
++            # unchanged, so outputs stay exact; only the draft (acceptance)
++            # and the number of tokens the target verifies per step change.
++            config.draft_block_size = num_spec + 1
++            config.dspark_block_size = num_spec
+         if vllm_config.model_config.max_model_len > config.max_position_embeddings:
+             raise ValueError(
+                 "Inkling2 DSpark drafts up to max_position_embeddings="

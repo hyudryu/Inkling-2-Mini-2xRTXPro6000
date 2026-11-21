@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 430" width="760" height="430" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" role="img" aria-label="Per-user decode speed vs concurrency">
+<rect width="760" height="430" rx="8" fill="#1a1a19"/>
+<text x="24" y="30" font-size="17" font-weight="600" fill="#f0efec">Per-user decode speed vs concurrency</text>
+<text x="24" y="51" font-size="12.5" fill="#c3c2b7">Median request, tokens after first token ÷ time after first token · same runs as aggregate</text>
+<circle cx="30.0" cy="72.0" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<text x="41" y="76" font-size="12.5" fill="#c3c2b7">Prose</text>
+<rect x="91.4" y="67.4" width="9.2" height="9.2" rx="1.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<text x="107.0" y="76" font-size="12.5" fill="#c3c2b7">Coding</text>
+<path d="M169.2,66.0 L174.8,76.0 L163.6,76.0 Z" fill="#199e70" stroke="#1a1a19" stroke-width="2" stroke-linejoin="round"/>
+<text x="180.2" y="76" font-size="12.5" fill="#c3c2b7">Counting</text>
+<line x1="256.79999999999995" x2="280.79999999999995" y1="72" y2="72" stroke="#898781" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="287.79999999999995" y="76" font-size="12.5" fill="#c3c2b7">TP1 Baseline (dashed)</text>
+<line x1="64" x2="610" y1="374.0" y2="374.0" stroke="#383835" stroke-width="1"/>
+<text x="54" y="378.0" font-size="11.5" text-anchor="end" fill="#898781">0</text>
+<line x1="64" x2="610" y1="327.0" y2="327.0" stroke="#2c2c2a" stroke-width="1"/>
+<text x="54" y="331.0" font-size="11.5" text-anchor="end" fill="#898781">100</text>
+<line x1="64" x2="610" y1="280.0" y2="280.0" stroke="#2c2c2a" stroke-width="1"/>
+<text x="54" y="284.0" font-size="11.5" text-anchor="end" fill="#898781">200</text>
+<line x1="64" x2="610" y1="233.0" y2="233.0" stroke="#2c2c2a" stroke-width="1"/>
+<text x="54" y="237.0" font-size="11.5" text-anchor="end" fill="#898781">300</text>
+<line x1="64" x2="610" y1="186.0" y2="186.0" stroke="#2c2c2a" stroke-width="1"/>
+<text x="54" y="190.0" font-size="11.5" text-anchor="end" fill="#898781">400</text>
+<line x1="64" x2="610" y1="139.0" y2="139.0" stroke="#2c2c2a" stroke-width="1"/>
+<text x="54" y="143.0" font-size="11.5" text-anchor="end" fill="#898781">500</text>
+<line x1="64" x2="610" y1="92.0" y2="92.0" stroke="#2c2c2a" stroke-width="1"/>
+<text x="54" y="96.0" font-size="11.5" text-anchor="end" fill="#898781">600</text>
+<text x="18" y="233.0" font-size="11.5" fill="#898781" text-anchor="middle" transform="rotate(-90 18 233.0)">Output tokens/s per request</text>
+<text x="109.5" y="396" font-size="12" text-anchor="middle" fill="#c3c2b7">C1</text>
+<text x="200.5" y="396" font-size="12" text-anchor="middle" fill="#c3c2b7">C2</text>
+<text x="291.5" y="396" font-size="12" text-anchor="middle" fill="#c3c2b7">C4</text>
+<text x="382.5" y="396" font-size="12" text-anchor="middle" fill="#c3c2b7">C8</text>
+<text x="473.5" y="396" font-size="12" text-anchor="middle" fill="#c3c2b7">C16</text>
+<text x="564.5" y="396" font-size="12" text-anchor="middle" fill="#c3c2b7">C32</text>
+<text x="337.0" y="418" font-size="11.5" text-anchor="middle" fill="#898781">Concurrent requests</text>
+<polyline points="109.5,291.4 200.5,303.6 291.5,315.7 382.5,324.2 473.5,329.9 564.5,343.3" fill="none" stroke="#3987e5" stroke-width="2" stroke-dasharray="5 4" stroke-linecap="round" opacity="0.75"/>
+<polyline points="109.5,227.2 200.5,261.2 291.5,275.9 382.5,297.5 473.5,304.1 564.5,319.7" fill="none" stroke="#d95926" stroke-width="2" stroke-dasharray="5 4" stroke-linecap="round" opacity="0.75"/>
+<polyline points="109.5,188.0 200.5,202.5 291.5,220.5 382.5,242.1 473.5,261.9 564.5,296.6" fill="none" stroke="#199e70" stroke-width="2" stroke-dasharray="5 4" stroke-linecap="round" opacity="0.75"/>
+<polyline points="109.5,257.7 200.5,268.1 291.5,287.5 382.5,304.6 473.5,316.8 564.5,330.4" fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="109.5" cy="257.7" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="200.5" cy="268.1" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="291.5" cy="287.5" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="382.5" cy="304.6" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="473.5" cy="316.8" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<circle cx="564.5" cy="330.4" r="5" fill="#3987e5" stroke="#1a1a19" stroke-width="2"/>
+<polyline points="109.5,186.0 200.5,207.0 291.5,251.5 382.5,271.1 473.5,288.7 564.5,308.3" fill="none" stroke="#d95926" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="104.9" y="181.4" width="9.2" height="9.2" rx="1.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<rect x="195.9" y="202.4" width="9.2" height="9.2" rx="1.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<rect x="286.9" y="246.9" width="9.2" height="9.2" rx="1.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<rect x="377.9" y="266.5" width="9.2" height="9.2" rx="1.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<rect x="468.9" y="284.1" width="9.2" height="9.2" rx="1.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<rect x="559.9" y="303.7" width="9.2" height="9.2" rx="1.5" fill="#d95926" stroke="#1a1a19" stroke-width="2"/>
+<polyline points="109.5,144.4 200.5,160.0 291.5,193.2 382.5,222.0 473.5,253.6 564.5,286.2" fill="none" stroke="#199e70" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M109.5,138.4 L115.1,148.4 L103.9,148.4 Z" fill="#199e70" stroke="#1a1a19" stroke-width="2" stroke-linejoin="round"/>
+<path d="M200.5,154.0 L206.1,164.0 L194.9,164.0 Z" fill="#199e70" stroke="#1a1a19" stroke-width="2" stroke-linejoin="round"/>
+<path d="M291.5,187.2 L297.1,197.2 L285.9,197.2 Z" fill="#199e70" stroke="#1a1a19" stroke-width="2" stroke-linejoin="round"/>
+<path d="M382.5,216.0 L388.1,226.0 L376.9,226.0 Z" fill="#199e70" stroke="#1a1a19" stroke-width="2" stroke-linejoin="round"/>
+<path d="M473.5,247.6 L479.1,257.6 L467.9,257.6 Z" fill="#199e70" stroke="#1a1a19" stroke-width="2" stroke-linejoin="round"/>
+<path d="M564.5,280.2 L570.1,290.2 L558.9,290.2 Z" fill="#199e70" stroke="#1a1a19" stroke-width="2" stroke-linejoin="round"/>
+<text x="576.5" y="334.4" font-size="12.5" fill="#f0efec"><tspan font-weight="600">93</tspan><tspan fill="#c3c2b7"> Prose</tspan></text>
+<text x="576.5" y="312.3" font-size="12.5" fill="#f0efec"><tspan font-weight="600">140</tspan><tspan fill="#c3c2b7"> Coding</tspan></text>
+<text x="576.5" y="290.2" font-size="12.5" fill="#f0efec"><tspan font-weight="600">187</tspan><tspan fill="#c3c2b7"> Counting</tspan></text>
+</svg>
